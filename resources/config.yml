@@ -1,0 +1,61 @@
+# Main settings for FFA arenas.
+
+# Config version. Don't change it!
+config-version: 1.0
+
+# Arenas settings.
+soup:
+  world: "soup" # Level name
+  coordinates: 
+    spawn: # Spawn coordinates
+      "x": 156
+      "y": 48
+      "z": 68
+    spectator: # Spectator coordinates 
+      "x": 156
+      "y": 64
+      "z": 68
+  knockback: 0.385 # Knockback value (0.4 is default)
+  bar: "§fSoups: §e{SOUPS} §7| §fPing: §e{PING}ms" # Soup bar. Availible tags: {SOUPS}, {PING}
+
+nodebuff:
+  world: "nodebuff" # Level name
+  coordinates: 
+    spawn: # Spawn coordinates
+      "x": 137
+      "y": 78
+      "z": 130
+    spectator: # Spectator coordinates 
+      "x": 136
+      "y": 108
+      "z": 134
+  knockback: 0.385 # Knockback value (0.4 is default)
+  bar: "§fPots: §e{POTS} §7| §fPing: §e{PING}ms" # Nodebuff bar. Availible tags: {POTS}, {PING}
+
+gapple:
+  world: "gapple" # Level name
+  coordinates: 
+    spawn: # Spawn coordinates
+      "x": 158
+      "y": 81
+      "z": 128
+    spectator: # Spectator coordinates 
+      "x": 158
+      "y": 97
+      "z": 128
+  knockback: 0.425 # Knockback value (0.4 is default)
+  bar: "§fPing: §e{PING}ms" # Gapple bar. Availible tags: {PING}
+
+# Messages that will be shown in arenas.
+# Availible tags: {DEAD}, {KILLER}, {KILLER_HEALTH}, {DEAD_SOUPS}, {KILLER_SOUPS}, {DEAD_POTS}, {KILLER_POTS}
+messages:
+  broadcast:
+    soup: "§e{DEAD} §c[{DEAD_SOUPS} SOUPS] §6was killed by §e{KILLER} §c[{KILLER_SOUPS} SOUPS] [{KILLER_HEALTH} HP]"
+    nodebuff: "§e{DEAD} §c[{DEAD_POTS} POTS] §6was killed by {KILLER} §c[{KILLER_POTS} POTS] [{KILLER_HEALTH} HP]"
+    gapple: "§e{DEAD} §6was killed by §e{KILLER} §c[{KILLER_HEALTH} HP]"
+  kill: "§eYou have killed: §c{DEAD}"
+  death: "§eYou were killed by: §c{KILLER}"
+  respawn: "§eYou have been respawned!"
+  quit: "§eYou have left from arena!"
+
+# This plugin was made by Lunarelly. Good luck with it!
