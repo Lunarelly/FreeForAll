@@ -328,13 +328,9 @@ final class Main extends PluginBase {
         # Player settings
         $player->removeAllEffects();
         $player->setGamemode(2);
-        $player->setHealth(1);
-        $player->setMaxHealth(1);
+        $player->setHealth(20);
+        $player->setMaxHealth(20);
         $player->setFood(20);
-        $menu = Server::getInstance()->getPluginManager()->getPlugin("AntraliaMenu");
-        if($menu !== null) {
-            $menu->setMenuItems($player);
-        }
         $player->teleport(Server::getInstance()->getDefaultLevel()->getSafeSpawn());
     }
 
