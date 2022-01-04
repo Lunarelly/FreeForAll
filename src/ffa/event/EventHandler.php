@@ -34,6 +34,8 @@ use pocketmine\{
 };
 use ffa\Main;
 
+use function str_replace;
+
 class EventHandler implements Listener {
 
     public function __construct(Main $main) {

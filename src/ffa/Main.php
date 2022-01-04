@@ -40,6 +40,11 @@ use ffa\{
     task\BarTask
 };
 
+use function strtolower;
+use function in_array;
+use function str_replace;
+use function str_repeat;
+
 final class Main extends PluginBase {
 
     public $modes = ["soup", "nodebuff", "gapple"];
@@ -328,9 +333,13 @@ final class Main extends PluginBase {
         # Player settings
         $player->removeAllEffects();
         $player->setGamemode(2);
-        $player->setHealth(20);
-        $player->setMaxHealth(20);
+        $player->setHealth(1);
+        $player->setMaxHealth(1);
         $player->setFood(20);
+        $menu = Server::getInstance()->getPluginManager()->getPlugin("AntraliaMenu");
+        if($menu !== null) {
+            $menu->setMenuItems($player);
+        }
         $player->teleport(Server::getInstance()->getDefaultLevel()->getSafeSpawn());
     }
 
