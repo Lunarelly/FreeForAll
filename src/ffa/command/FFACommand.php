@@ -58,15 +58,15 @@ class FFACommand extends Command {
                 return $sender->sendMessage("Mode not found");
             }
             if($args[1] == "soup") {
-                $this->main->joinSoupArena($sender);
+                $this->main->joinArena($sender, "soup");
                 return $sender->sendMessage("You've joined Soup FFA! Leave: /ffa quit");
             }
             if($args[1] == "nodebuff") {
-                $this->main->joinNodebuffArena($sender);
+                $this->main->joinArena($sender, "nodebuff");
                 return $sender->sendMessage("You've joined Nodebuff FFA! Leave: /ffa quit");
             }
             if($args[1] == "gapple") {
-                $this->main->joinGappleArena($sender);
+                $this->main->joinArena($sender, "gapple");
                 return $sender->sendMessage("You've joined Gapple FFA! Leave: /ffa quit");
             }
         }
@@ -83,7 +83,7 @@ class FFACommand extends Command {
             return $sender->sendMessage("Your FFA kills: " . $kills);
         }
         if($args[0] == "info") {
-            return $sender->sendMessage("This server is running FFA v1.0.4\nAuthor: Lunarelly\nGitHub: https://github.com/Lunarelly");
+            return $sender->sendMessage("This server is running FFA v1.0.5\nAuthor: Lunarelly\nGitHub: https://github.com/Lunarelly");
         }
         return true;
     }

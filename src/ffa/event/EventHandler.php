@@ -81,7 +81,7 @@ class EventHandler implements Listener {
                             $this->main->setSpectatorSettings($entity);
                             $entity->sendMessage(str_replace("{KILLER}", $damager->getDisplayName(), $this->main->getConfig()->getNested("messages.death")));
                             $this->main->addKill($damager);
-                            $this->main->soupRefill($damager);
+                            $this->main->arenaRefill($damager, "soup");
                             $damager->sendMessage(str_replace("{DEAD}", $entity->getDisplayName(), $this->main->getConfig()->getNested("messages.kill")));
                             return true;
                             break;
@@ -92,7 +92,7 @@ class EventHandler implements Listener {
                             $this->main->setSpectatorSettings($entity);
                             $entity->sendMessage(str_replace("{KILLER}", $damager->getDisplayName(), $this->main->getConfig()->getNested("messages.death")));
                             $this->main->addKill($damager);
-                            $this->main->nodebuffRefill($damager);
+                            $this->main->arenaRefill($damager, "nodebuff");
                             $damager->sendMessage(str_replace("{DEAD}", $entity->getDisplayName(), $this->main->getConfig()->getNested("messages.kill")));
                             return true;
                             break;
@@ -103,7 +103,7 @@ class EventHandler implements Listener {
                             $this->main->setSpectatorSettings($entity);
                             $entity->sendMessage(str_replace("{KILLER}", $damager->getDisplayName(), $this->main->getConfig()->getNested("messages.death")));
                             $this->main->addKill($damager);
-                            $this->main->gappleRefill($damager);
+                            $this->main->arenaRefill($damager, "gapple");
                             $damager->sendMessage(str_replace("{DEAD}", $entity->getDisplayName(), $this->main->getConfig()->getNested("messages.kill")));
                             return true;
                             break;
@@ -116,21 +116,21 @@ class EventHandler implements Listener {
     public function onInteract(PlayerInteractEvent $event) {
         $player = $event->getPlayer();
         $item = $event->getItem();
-        if($item->getId() == 388 && $item->getDamage() == 0 && $item->getCustomName() == "§r§aRespawn §7(Right-Click)") {
+        if($item->getId() == 388 && $item->getDamage() == 0 && $item->getCustomName() == $this->main->getConfig()->getNested("items.respawn")) {
             switch($player->getLevel()) {
                 case $this->main->soupArena:
-                    $this->main->joinSoupArena($player);
+                    $this->main->joinArena($player, "soup");
                     break;
                 case $this->main->nodebuffArena:
-                    $this->main->joinNodebuffArena($player);
+                    $this->main->joinArena($player, "nodebuff");
                     break;
                 case $this->main->gappleArena:
-                    $this->main->joinGappleArena($player);
+                    $this->main->joinArena($player, "gapple");
                     break;
             }
             $player->sendMessage($this->main->getConfig()->getNested("messages.respawn"));
         }
-        if($item->getId() == 351 && $item->getDamage() == 1 && $item->getCustomName() == "§r§cQuit §7(Right-Click)") {
+        if($item->getId() == 351 && $item->getDamage() == 1 && $item->getCustomName() == $this->main->getConfig()->getNested("items.quit")) {
             if($player->getLevel() == $this->main->soupArena or $player->getLevel() == $this->main->nodebuffArena or $player->getLevel() == $this->main->gappleArena) {
                 $this->main->quitArena($player);
                 $player->sendMessage($this->main->getConfig()->getNested("messages.quit"));

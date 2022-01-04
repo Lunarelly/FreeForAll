@@ -33,13 +33,13 @@ class BarTask extends PluginTask {
         foreach(Server::getInstance()->getOnlinePlayers() as $players) {
             switch($players->getLevel()) {
                 case $this->main->soupArena:
-                    $this->main->sendSoupBar($players);
+                    $this->main->sendArenaBar($players, "soup");
                     break;
                 case $this->main->nodebuffArena:
-                    $this->main->sendNodebuffBar($players);
+                    $this->main->sendArenaBar($players, "nodebuff");
                     break;
                 case $this->main->gappleArena:
-                    $this->main->sendGappleBar($players);
+                    $this->main->sendArenaBar($players, "gapple");
                     break;
             }
         }

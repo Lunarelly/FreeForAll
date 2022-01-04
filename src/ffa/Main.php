@@ -42,12 +42,17 @@ use ffa\{
 
 final class Main extends PluginBase {
 
+    public $modes = ["soup", "nodebuff", "gapple"];
+
     public function onEnable() {
         Server::getInstance()->getCommandMap()->register("ffa", new FFACommand($this));
         Server::getInstance()->getPluginManager()->registerEvents(new EventHandler($this), $this);
         Server::getInstance()->getPluginManager()->registerEvents(new SoupHeal($this), $this);
         Server::getInstance()->getScheduler()->scheduleRepeatingTask(new BarTask($this), 20);
+        @mkdir($this->getDataFolder());
+        @mkdir($this->getDataFolder() . "data");
         $this->saveDefaultConfig();
+        $this->killsConfig = new Config($this->getDataFolder() . "data/kills.json", Config::JSON);
         Server::getInstance()->loadlevel($this->getConfig()->getNested("soup.world"));
         Server::getInstance()->loadlevel($this->getConfig()->getNested("nodebuff.world"));
         Server::getInstance()->loadlevel($this->getConfig()->getNested("gapple.world"));
@@ -76,9 +81,8 @@ final class Main extends PluginBase {
     }
 
     public function killsConfig() {
-        # Creating kills file (kills.yml)
-        @mkdir($this->getDataFolder());
-        $config = new Config($this->getDataFolder() . "kills.yml", Config::YAML);
+        # This function will return kills config (kills.json)
+        $config = $this->killsConfig;
         return $config;
     }
 
@@ -109,8 +113,8 @@ final class Main extends PluginBase {
         $config->save();
     }
 
-    public function joinSoupArena(Player $player) {
-        # Player settings
+    public function setPlayerArenaSettings(Player $player) {
+        # This function will set player's settings
         $player->setGamemode(2);
         $player->setMaxHealth(20);
         $player->setHealth(20);
@@ -120,108 +124,94 @@ final class Main extends PluginBase {
         $player->removeAllEffects();
         $player->extinguish();
         $player->setSprinting(false);
-        # Soup kit
-        $helmet = Item::get(306, 0, 1); // Iron Helmet
-        $chestplate = Item::get(307, 0, 1); // Iron Chestplate
-        $leggings = Item::get(308, 0, 1); // Iron Leggings
-        $boots = Item::get(309, 0, 1); // Iron Boots
-        $sword = Item::get(272, 0, 1); // Stone Sword
-        $steak = Item::get(364, 0, 16); // Steak
-        $soup = Item::get(282, 0, 16); // Mushroom Stew
-        # Giving kit
-        $inventory = $player->getInventory();
-        $inventory->setHelmet($helmet);
-        $inventory->setChestplate($chestplate);
-        $inventory->setLeggings($leggings);
-        $inventory->setBoots($boots);
-        $inventory->addItem($sword);
-        $inventory->addItem($steak);
-        $inventory->addItem($soup);
-        # Teleporting to arena
-        if($player->getLevel() !== $this->soupArena) {
-            $player->teleport(Position::fromObject(new Vector3($this->soupX, $this->soupY, $this->soupZ), $this->soupArena));
-        } else {
-            $player->teleport(new Vector3($this->soupX, $this->soupY, $this->soupZ));
-        }
-        # Sound effect
-        $player->getLevel()->addSound(new EndermanTeleportSound($player));
     }
 
-    public function joinNodebuffArena(Player $player) {
-        # Player settings
-        $player->setGamemode(2);
-        $player->setMaxHealth(20);
-        $player->setHealth(20);
-        $player->setFood(20);
-        $player->setAllowFlight(false);
-        $player->getInventory()->clearAll();
-        $player->removeAllEffects();
-        $player->extinguish();
-        $player->setSprinting(false);
-        # Nodebuff kit
-        $helmet = Item::get(310, 0, 1); // Diamond Helmet
-        $chestplate = Item::get(311, 0, 1); // Diamond Chestplate
-        $leggings = Item::get(312, 0, 1); // Diamond Leggings
-        $boots = Item::get(313, 0, 1); // Diamond Boots
-        $sword = Item::get(276, 0, 1); // Diamond Sword
-        $steak = Item::get(364, 0, 16); // Steak
-        $potion = Item::get(438, 22, 34); // Healing Potion II
-        # Giving kit
-        $inventory = $player->getInventory();
-        $inventory->setHelmet($helmet);
-        $inventory->setChestplate($chestplate);
-        $inventory->setLeggings($leggings);
-        $inventory->setBoots($boots);
-        $inventory->addItem($sword);
-        $inventory->addItem($steak);
-        $inventory->addItem($potion);
-        # Nodebuff effects
-        $speed = Effect::getEffect(1); // Speed effect
-        $speed->setAmplifier(0);
-        $speed->setDuration(2147483648);
-        $speed->setVisible(false);
-        $player->addEffect($speed);
-        # Teleporting to arena
-        if($player->getLevel() !== $this->nodebuffArena) {
-            $player->teleport(Position::fromObject(new Vector3($this->nodebuffX, $this->nodebuffY, $this->nodebuffZ), $this->nodebuffArena));
-        } else {
-            $player->teleport(new Vector3($this->nodebuffX, $this->nodebuffY, $this->nodebuffZ));
+    public function joinArena(Player $player, string $mode) {
+        if(!(in_array($mode, $this->modes))) {
+            return $player->sendMessage("Unknown mode");
         }
-        # Sound effect
-        $player->getLevel()->addSound(new EndermanTeleportSound($player));
-    }
-
-    public function joinGappleArena(Player $player) {
         # Player settings
-        $player->setGamemode(2);
-        $player->setMaxHealth(20);
-        $player->setHealth(20);
-        $player->setFood(20);
-        $player->setAllowFlight(false);
-        $player->getInventory()->clearAll();
-        $player->removeAllEffects();
-        $player->extinguish();
-        $player->setSprinting(false);
-        # Gapple kit
-        $helmet = Item::get(310, 0, 1); // Diamond Helmet
-        $chestplate = Item::get(311, 0, 1); // Diamond Chestplate
-        $leggings = Item::get(312, 0, 1); // Diamond Leggings
-        $boots = Item::get(313, 0, 1); // Diamond Boots
-        $sword = Item::get(276, 0, 1); // Diamond Sword
-        $goldenapple = Item::get(322, 0, 8); // Golden Apple
-        # Giving kit
-        $inventory = $player->getInventory();
-        $inventory->setHelmet($helmet);
-        $inventory->setChestplate($chestplate);
-        $inventory->setLeggings($leggings);
-        $inventory->setBoots($boots);
-        $inventory->addItem($sword);
-        $inventory->addItem($goldenapple);
-        # Teleporting to arena
-        if($player->getLevel() !== $this->gappleArena) {
-            $player->teleport(Position::fromObject(new Vector3($this->gappleX, $this->gappleY, $this->gappleZ), $this->gappleArena));
-        } else {
-            $player->teleport(new Vector3($this->gappleX, $this->gappleY, $this->gappleZ));
+        $this->setPlayerArenaSettings($player);
+        switch($mode) {
+            case "soup":
+                # Soup kit
+                $helmet = Item::get(306, 0, 1); // Iron Helmet
+                $chestplate = Item::get(307, 0, 1); // Iron Chestplate
+                $leggings = Item::get(308, 0, 1); // Iron Leggings
+                $boots = Item::get(309, 0, 1); // Iron Boots
+                $sword = Item::get(272, 0, 1); // Stone Sword
+                $steak = Item::get(364, 0, 16); // Steak
+                $soup = Item::get(282, 0, 16); // Mushroom Stew
+                # Giving kit
+                $inventory = $player->getInventory();
+                $inventory->setHelmet($helmet);
+                $inventory->setChestplate($chestplate);
+                $inventory->setLeggings($leggings);
+                $inventory->setBoots($boots);
+                $inventory->addItem($sword);
+                $inventory->addItem($steak);
+                $inventory->addItem($soup);
+                # Teleporting to arena
+                if($player->getLevel() !== $this->soupArena) {
+                    $player->teleport(Position::fromObject(new Vector3($this->soupX, $this->soupY, $this->soupZ), $this->soupArena));
+                } else {
+                    $player->teleport(new Vector3($this->soupX, $this->soupY, $this->soupZ));
+                }
+                break;
+            case "nodebuff":
+                # Nodebuff kit
+                $helmet = Item::get(310, 0, 1); // Diamond Helmet
+                $chestplate = Item::get(311, 0, 1); // Diamond Chestplate
+                $leggings = Item::get(312, 0, 1); // Diamond Leggings
+                $boots = Item::get(313, 0, 1); // Diamond Boots
+                $sword = Item::get(276, 0, 1); // Diamond Sword
+                $steak = Item::get(364, 0, 16); // Steak
+                $potion = Item::get(438, 22, 34); // Healing Potion II
+                # Giving kit
+                $inventory = $player->getInventory();
+                $inventory->setHelmet($helmet);
+                $inventory->setChestplate($chestplate);
+                $inventory->setLeggings($leggings);
+                $inventory->setBoots($boots);
+                $inventory->addItem($sword);
+                $inventory->addItem($steak);
+                $inventory->addItem($potion);
+                # Nodebuff effects
+                $speed = Effect::getEffect(1); // Speed effect
+                $speed->setAmplifier(0);
+                $speed->setDuration(2147483648);
+                $speed->setVisible(false);
+                $player->addEffect($speed);
+                # Teleporting to arena
+                if($player->getLevel() !== $this->nodebuffArena) {
+                    $player->teleport(Position::fromObject(new Vector3($this->nodebuffX, $this->nodebuffY, $this->nodebuffZ), $this->nodebuffArena));
+                } else {
+                    $player->teleport(new Vector3($this->nodebuffX, $this->nodebuffY, $this->nodebuffZ));
+                }
+                break;
+            case "gapple":
+                # Gapple kit
+                $helmet = Item::get(310, 0, 1); // Diamond Helmet
+                $chestplate = Item::get(311, 0, 1); // Diamond Chestplate
+                $leggings = Item::get(312, 0, 1); // Diamond Leggings
+                $boots = Item::get(313, 0, 1); // Diamond Boots
+                $sword = Item::get(276, 0, 1); // Diamond Sword
+                $goldenapple = Item::get(322, 0, 8); // Golden Apple
+                # Giving kit
+                $inventory = $player->getInventory();
+                $inventory->setHelmet($helmet);
+                $inventory->setChestplate($chestplate);
+                $inventory->setLeggings($leggings);
+                $inventory->setBoots($boots);
+                $inventory->addItem($sword);
+                $inventory->addItem($goldenapple);
+                # Teleporting to arena
+                if($player->getLevel() !== $this->gappleArena) {
+                    $player->teleport(Position::fromObject(new Vector3($this->gappleX, $this->gappleY, $this->gappleZ), $this->gappleArena));
+                } else {
+                    $player->teleport(new Vector3($this->gappleX, $this->gappleY, $this->gappleZ));
+                }
+                break;
         }
         # Sound effect
         $player->getLevel()->addSound(new EndermanTeleportSound($player));
@@ -240,12 +230,7 @@ final class Main extends PluginBase {
                 $player->teleport(new Vector3($this->gappleSpectatorX, $this->gappleSpectatorY, $this->gappleSpectatorZ));
                 break;
         }
-        $player->setMaxHealth(20);
-        $player->setHealth(20);
-        $player->setFood(20);
-        $player->setGamemode(2);
-        $player->getInventory()->clearAll();
-        $player->removeAllEffects();
+        $this->setPlayerArenaSettings($player);
         $invisibility = Effect::getEffect(14); // Invisibility effect
         $invisibility->setAmplifier(0);
         $invisibility->setDuration(2147483648);
@@ -253,7 +238,7 @@ final class Main extends PluginBase {
         $player->addEffect($invisibility);
         # Giving menu items
         $inventory = $player->getInventory();
-        $inventory->addItem(Item::get(388)->setCustomName("§r§aRespawn §7(Right-Click)"));
+        $inventory->addItem(Item::get(388)->setCustomName($this->getConfig()->getNested("items.respawn")));
         $inventory->addItem(Item::get(102)->setCustomName("§0"));
         $inventory->addItem(Item::get(102)->setCustomName("§1"));
         $inventory->addItem(Item::get(102)->setCustomName("§2"));
@@ -261,95 +246,80 @@ final class Main extends PluginBase {
         $inventory->addItem(Item::get(102)->setCustomName("§4"));
         $inventory->addItem(Item::get(102)->setCustomName("§5"));
         $inventory->addItem(Item::get(102)->setCustomName("§6"));
-        $inventory->addItem(Item::get(351, 1)->setCustomName("§r§cQuit §7(Right-Click)"));
+        $inventory->addItem(Item::get(351, 1)->setCustomName($this->getConfig()->getNested("items.quit")));
         # Sound effect
         $player->getLevel()->addSound(new ExplodeSound($player));
     }
 
-    public function soupRefill(Player $player) {
+    public function arenaRefill(Player $player, string $mode) {
+        if(!(in_array($mode, $this->modes))) {
+            return $player->sendMessage("Unknown mode");
+        }
         # Player settings
-        $player->setMaxHealth(20);
-        $player->setHealth(20);
-        $player->setFood(20);
-        $player->getInventory()->clearAll();
-        $player->removeAllEffects();
-        # Soup kit
-        $helmet = Item::get(306, 0, 1); // Iron Helmet
-        $chestplate = Item::get(307, 0, 1); // Iron Chestplate
-        $leggings = Item::get(308, 0, 1); // Iron Leggings
-        $boots = Item::get(309, 0, 1); // Iron Boots
-        $sword = Item::get(272, 0, 1); // Stone Sword
-        $steak = Item::get(364, 0, 16); // Steak
-        $soup = Item::get(282, 0, 16); // Mushroom Stew
-        # Giving kit
-        $inventory = $player->getInventory();
-        $inventory->setHelmet($helmet);
-        $inventory->setChestplate($chestplate);
-        $inventory->setLeggings($leggings);
-        $inventory->setBoots($boots);
-        $inventory->addItem($sword);
-        $inventory->addItem($steak);
-        $inventory->addItem($soup);
-        # Sound effect
-        $player->getLevel()->addSound(new AnvilFallSound($player));
-    }
-
-    public function nodebuffRefill(Player $player) {
-        # Player settings
-        $player->setMaxHealth(20);
-        $player->setHealth(20);
-        $player->setFood(20);
-        $player->getInventory()->clearAll();
-        $player->removeAllEffects();
-        # Nodebuff kit
-        $helmet = Item::get(310, 0, 1); // Diamond Helmet
-        $chestplate = Item::get(311, 0, 1); // Diamond Chestplate
-        $leggings = Item::get(312, 0, 1); // Diamond Leggings
-        $boots = Item::get(313, 0, 1); // Diamond Boots
-        $sword = Item::get(276, 0, 1); // Diamond Sword
-        $steak = Item::get(364, 0, 16); // Steak
-        $potion = Item::get(438, 22, 34); // Healing Potion II
-        # Giving kit
-        $inventory = $player->getInventory();
-        $inventory->setHelmet($helmet);
-        $inventory->setChestplate($chestplate);
-        $inventory->setLeggings($leggings);
-        $inventory->setBoots($boots);
-        $inventory->addItem($sword);
-        $inventory->addItem($steak);
-        $inventory->addItem($potion);
-        # Nodebuff effects
-        $speed = Effect::getEffect(1); // Speed effect
-        $speed->setAmplifier(0);
-        $speed->setDuration(2147483648);
-        $speed->setVisible(false);
-        $player->addEffect($speed);
-        # Sound effect
-        $player->getLevel()->addSound(new AnvilFallSound($player));
-    }
-
-    public function gappleRefill(Player $player) {
-        # Player settings
-        $player->setMaxHealth(20);
-        $player->setHealth(20);
-        $player->setFood(20);
-        $player->getInventory()->clearAll();
-        $player->removeAllEffects();
-        # Gapple kit
-        $helmet = Item::get(310, 0, 1); // Diamond Helmet
-        $chestplate = Item::get(311, 0, 1); // Diamond Chestplate
-        $leggings = Item::get(312, 0, 1); // Diamond Leggings
-        $boots = Item::get(313, 0, 1); // Diamond Boots
-        $sword = Item::get(276, 0, 1); // Diamond Sword
-        $goldenapple = Item::get(322, 0, 8); // Golden Apple
-        # Giving kit
-        $inventory = $player->getInventory();
-        $inventory->setHelmet($helmet);
-        $inventory->setChestplate($chestplate);
-        $inventory->setLeggings($leggings);
-        $inventory->setBoots($boots);
-        $inventory->addItem($sword);
-        $inventory->addItem($goldenapple);
+        $this->setPlayerArenaSettings($player);
+        switch($mode) {
+            case "soup":
+                # Soup kit
+                $helmet = Item::get(306, 0, 1); // Iron Helmet
+                $chestplate = Item::get(307, 0, 1); // Iron Chestplate
+                $leggings = Item::get(308, 0, 1); // Iron Leggings
+                $boots = Item::get(309, 0, 1); // Iron Boots
+                $sword = Item::get(272, 0, 1); // Stone Sword
+                $steak = Item::get(364, 0, 16); // Steak
+                $soup = Item::get(282, 0, 16); // Mushroom Stew
+                # Giving kit
+                $inventory = $player->getInventory();
+                $inventory->setHelmet($helmet);
+                $inventory->setChestplate($chestplate);
+                $inventory->setLeggings($leggings);
+                $inventory->setBoots($boots);
+                $inventory->addItem($sword);
+                $inventory->addItem($steak);
+                $inventory->addItem($soup);
+                break;
+            case "nodebuff":
+                # Nodebuff kit
+                $helmet = Item::get(310, 0, 1); // Diamond Helmet
+                $chestplate = Item::get(311, 0, 1); // Diamond Chestplate
+                $leggings = Item::get(312, 0, 1); // Diamond Leggings
+                $boots = Item::get(313, 0, 1); // Diamond Boots
+                $sword = Item::get(276, 0, 1); // Diamond Sword
+                $steak = Item::get(364, 0, 16); // Steak
+                $potion = Item::get(438, 22, 34); // Healing Potion II
+                # Giving kit
+                $inventory = $player->getInventory();
+                $inventory->setHelmet($helmet);
+                $inventory->setChestplate($chestplate);
+                $inventory->setLeggings($leggings);
+                $inventory->setBoots($boots);
+                $inventory->addItem($sword);
+                $inventory->addItem($steak);
+                $inventory->addItem($potion);
+                # Nodebuff effects
+                $speed = Effect::getEffect(1); // Speed effect
+                $speed->setAmplifier(0);
+                $speed->setDuration(2147483648);
+                $speed->setVisible(false);
+                $player->addEffect($speed);
+                break;
+            case "gapple":
+                # Gapple kit
+                $helmet = Item::get(310, 0, 1); // Diamond Helmet
+                $chestplate = Item::get(311, 0, 1); // Diamond Chestplate
+                $leggings = Item::get(312, 0, 1); // Diamond Leggings
+                $boots = Item::get(313, 0, 1); // Diamond Boots
+                $sword = Item::get(276, 0, 1); // Diamond Sword
+                $goldenapple = Item::get(322, 0, 8); // Golden Apple
+                # Giving kit
+                $inventory = $player->getInventory();
+                $inventory->setHelmet($helmet);
+                $inventory->setChestplate($chestplate);
+                $inventory->setLeggings($leggings);
+                $inventory->setBoots($boots);
+                $inventory->addItem($sword);
+                $inventory->addItem($goldenapple);
+                break;
+        }
         # Sound effect
         $player->getLevel()->addSound(new AnvilFallSound($player));
     }
@@ -388,24 +358,25 @@ final class Main extends PluginBase {
         return $pots;
     }
 
-    public function sendSoupBar(Player $player) {
+    public function sendArenaBar(Player $player, string $mode) {
+        if(!(in_array($mode, $this->modes))) {
+            return $player->sendMessage("Unknown mode");
+        }
         $lines = str_repeat("\n", 3);
         $soups = $this->countSoups($player);
-        $ping = $player->getPing();
-        $player->sendTip($lines . str_replace(["{SOUPS}", "{PING}"], [$soups, $ping], $this->getConfig()->getNested("soup.bar")));
-    }
-
-    public function sendNodebuffBar(Player $player) {
-        $lines = str_repeat("\n", 3);
         $pots = $this->countPots($player);
         $ping = $player->getPing();
-        $player->sendTip($lines . str_replace(["{POTS}", "{PING}"], [$pots, $ping], $this->getConfig()->getNested("nodebuff.bar")));
-    }
-
-    public function sendGappleBar(Player $player) {
-        $lines = str_repeat("\n", 3);
-        $ping = $player->getPing();
-        $player->sendTip($lines . str_replace("{PING}", $ping, $this->getConfig()->getNested("gapple.bar")));
+        switch($mode) {
+            case "soup":
+                $player->sendTip($lines . str_replace(["{SOUPS}", "{PING}"], [$soups, $ping], $this->getConfig()->getNested("soup.bar")));
+                break;
+            case "nodebuff":
+                $player->sendTip($lines . str_replace(["{POTS}", "{PING}"], [$pots, $ping], $this->getConfig()->getNested("nodebuff.bar")));
+                break;
+            case "gapple":
+                $player->sendTip($lines . str_replace("{PING}", $ping, $this->getConfig()->getNested("gapple.bar")));
+                break;
+        }
     }
 
     public function onDisable() {

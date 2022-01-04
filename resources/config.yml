@@ -58,4 +58,8 @@ messages:
   respawn: "§eYou have been respawned!"
   quit: "§eYou have left from arena!"
 
+items:
+  respawn: "§r§aRespawn §7(Right-Click)"
+  quit: "§r§cQuit §7(Right-Click)"
+
 # This plugin was made by Lunarelly. Good luck with it!
